@@ -6,7 +6,7 @@ import { Link } from "react-router-dom";
 import { Star, Filter } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 
-// Reusing the product data from FeaturedProducts
+// Product Data
 const products = [
   {
     id: 1,
@@ -67,9 +67,10 @@ const products = [
 const Shop = () => {
   const { category } = useParams();
   const navigate = useNavigate();
+  
   const [activeFilter, setActiveFilter] = useState<string>("All");
   const [hoveredProductId, setHoveredProductId] = useState<number | null>(null);
-  const [sortBy, setSortBy] = useState("newest");
+  const [sortBy, setSortBy] = useState<string>("newest");
   const [displayedProducts, setDisplayedProducts] = useState(products);
 
   const filters = ["All", "Fashion", "Electronics", "Home Decor"];
@@ -86,12 +87,12 @@ const Shop = () => {
   // Apply filters and sorting
   useEffect(() => {
     let filtered = [...products];
-    
+
     // Apply category filter
     if (activeFilter !== "All") {
       filtered = filtered.filter(product => product.category === activeFilter);
     }
-    
+
     // Apply sorting
     switch (sortBy) {
       case "priceLow":
@@ -104,10 +105,9 @@ const Shop = () => {
         filtered.sort((a, b) => b.rating - a.rating);
         break;
       default:
-        // "newest" - no change to order for now
-        break;
+        break; // "newest" is the default
     }
-    
+
     setDisplayedProducts(filtered);
   }, [activeFilter, sortBy]);
 
@@ -121,8 +121,6 @@ const Shop = () => {
   const handleAddToCart = (productId: number, e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    // In a real app, this would add the product to the cart
-    console.log(`Added product ${productId} to cart`);
     toast({
       title: "Product added to cart",
       description: "The item has been added to your shopping cart.",
@@ -135,9 +133,7 @@ const Shop = () => {
         <div className="container mx-auto">
           <div className="text-center mb-12">
             <h1 className="text-4xl md:text-5xl font-bold text-deepNavy mb-4">Our Products</h1>
-            <p className="text-gray-600 max-w-2xl mx-auto">
-              Browse our collection of premium lifestyle products
-            </p>
+            <p className="text-gray-600 max-w-2xl mx-auto">Browse our collection of premium lifestyle products</p>
           </div>
 
           {/* Filters and Sorting */}
@@ -147,7 +143,7 @@ const Shop = () => {
                 <button
                   key={filter}
                   onClick={() => handleFilterChange(filter)}
-                  className={`filter-pill ${activeFilter === filter ? 'bg-pastelBlue font-medium' : ''}`}
+                  className={`filter-pill ${activeFilter === filter ? "bg-pastelBlue font-medium" : ""}`}
                 >
                   {filter}
                 </button>
@@ -155,7 +151,7 @@ const Shop = () => {
             </div>
             <div className="flex items-center gap-2">
               <Filter size={18} className="text-deepNavy" />
-              <select 
+              <select
                 className="input-field py-2 pl-4 pr-8"
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
@@ -171,62 +167,19 @@ const Shop = () => {
           {/* Product Grid */}
           <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-8">
             {displayedProducts.map((product) => (
-              <div 
-                key={product.id} 
-                className="product-card scroll-reveal"
-                onMouseEnter={() => setHoveredProductId(product.id)}
-                onMouseLeave={() => setHoveredProductId(null)}
-              >
+              <div key={product.id} className="product-card">
                 <Link to={`/shop/product/${product.id}`}>
-                  <div className="relative overflow-hidden aspect-square">
-                    <img
-                      src={hoveredProductId === product.id ? product.hoverImage : product.image}
-                      alt={product.name}
-                      className="w-full h-full object-cover product-image-hover"
-                    />
-                    <div className="absolute top-4 left-4">
-                      <span className="bg-deepNavy text-white text-xs px-3 py-1 rounded-full">
-                        {product.category}
-                      </span>
-                    </div>
+                  <div className="relative">
+                    <img src={product.image} alt={product.name} className="w-full" />
                   </div>
+                  <h3 className="text-lg font-bold mt-4">{product.name}</h3>
+                  <p>${product.price}</p>
                 </Link>
-                <div className="p-6">
-                  <Link to={`/shop/product/${product.id}`}>
-                    <h3 className="font-poppins font-semibold text-lg mb-2 hover:text-vibrantCoral transition-colors">
-                      {product.name}
-                    </h3>
-                  </Link>
-                  <div className="flex items-center mb-3">
-                    {[...Array(5)].map((_, i) => (
-                      <Star
-                        key={i}
-                        size={16}
-                        className={i < Math.floor(product.rating) ? "text-deepNavy fill-deepNavy" : "text-gray-300"}
-                      />
-                    ))}
-                    <span className="ml-2 text-sm text-gray-600">{product.rating}</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="font-poppins font-bold text-lg">${product.price}</span>
-                    <button 
-                      className="btn-primary px-3 py-1 text-sm"
-                      onClick={(e) => handleAddToCart(product.id, e)}
-                    >
-                      Add to Cart
-                    </button>
-                  </div>
-                </div>
               </div>
             ))}
           </div>
-          
-          {/* Empty state message */}
-          {displayedProducts.length === 0 && (
-            <div className="text-center py-12">
-              <p className="text-lg text-gray-600">No products found matching your criteria.</p>
-            </div>
-          )}
+
+          {displayedProducts.length === 0 && <p className="text-center py-12">No products found.</p>}
         </div>
       </div>
     </Layout>

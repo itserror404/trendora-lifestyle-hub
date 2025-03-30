@@ -1,7 +1,8 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ChevronLeft, ChevronRight, Star, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
+import { toast } from "@/components/ui/use-toast";
 
 // Mock product data
 const products = [
@@ -64,18 +65,28 @@ const products = [
 const FeaturedProducts = () => {
   const [activeFilter, setActiveFilter] = useState("All");
   const [hoveredProductId, setHoveredProductId] = useState<number | null>(null);
+  const [displayedProducts, setDisplayedProducts] = useState(products);
 
   const filters = ["All", "Fashion", "Electronics", "Home Decor"];
 
-  const filteredProducts = activeFilter === "All" 
-    ? products 
-    : products.filter(product => product.category === activeFilter);
+  // Update filtered products when activeFilter changes
+  useEffect(() => {
+    if (activeFilter === "All") {
+      setDisplayedProducts(products);
+    } else {
+      const filtered = products.filter(product => product.category === activeFilter);
+      setDisplayedProducts(filtered);
+    }
+  }, [activeFilter]);
 
   // Handle adding to cart
   const handleAddToCart = (productId: number) => {
     // In a real app, this would add the product to the cart
     console.log(`Added product ${productId} to cart`);
-    alert(`Product added to cart!`);
+    toast({
+      title: "Product added to cart",
+      description: "The item has been added to your shopping cart.",
+    });
   };
 
   return (
@@ -104,59 +115,72 @@ const FeaturedProducts = () => {
 
         {/* Product Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {filteredProducts.map((product) => (
-            <div 
-              key={product.id} 
-              className="product-card scroll-reveal"
-              onMouseEnter={() => setHoveredProductId(product.id)}
-              onMouseLeave={() => setHoveredProductId(null)}
-            >
-              <Link to={`/shop/product/${product.id}`}>
-                <div className="relative overflow-hidden aspect-square">
-                  <img
-                    src={hoveredProductId === product.id ? product.hoverImage : product.image}
-                    alt={product.name}
-                    className="w-full h-full object-cover product-image-hover"
-                  />
-                  <div className="absolute top-4 left-4">
-                    <span className="bg-deepNavy text-white text-xs px-3 py-1 rounded-full">
-                      {product.category}
-                    </span>
+          {displayedProducts.length > 0 ? (
+            displayedProducts.map((product) => (
+              <div 
+                key={product.id} 
+                className="product-card scroll-reveal"
+                onMouseEnter={() => setHoveredProductId(product.id)}
+                onMouseLeave={() => setHoveredProductId(null)}
+              >
+                <Link to={`/shop/product/${product.id}`}>
+                  <div className="relative overflow-hidden aspect-square">
+                    <img
+                      src={hoveredProductId === product.id ? product.hoverImage : product.image}
+                      alt={product.name}
+                      className="w-full h-full object-cover product-image-hover"
+                    />
+                    <div className="absolute top-4 left-4">
+                      <span className="bg-deepNavy text-white text-xs px-3 py-1 rounded-full">
+                        {product.category}
+                      </span>
+                    </div>
+                  </div>
+                </Link>
+                <div className="p-6">
+                  <Link to={`/shop/product/${product.id}`}>
+                    <h3 className="font-poppins font-semibold text-lg mb-2 hover:text-vibrantCoral transition-colors">
+                      {product.name}
+                    </h3>
+                  </Link>
+                  <div className="flex items-center mb-3">
+                    {[...Array(5)].map((_, i) => (
+                      <Star
+                        key={i}
+                        size={16}
+                        className={i < Math.floor(product.rating) ? "text-deepNavy fill-deepNavy" : "text-gray-300"}
+                      />
+                    ))}
+                    <span className="ml-2 text-sm text-gray-600">{product.rating}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="font-poppins font-bold text-lg">${product.price}</span>
+                    <button 
+                      className="btn-primary px-4 py-1.5 text-sm"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        handleAddToCart(product.id);
+                      }}
+                    >
+                      Add to Cart
+                    </button>
                   </div>
                 </div>
-              </Link>
-              <div className="p-6">
-                <Link to={`/shop/product/${product.id}`}>
-                  <h3 className="font-poppins font-semibold text-lg mb-2 hover:text-vibrantCoral transition-colors">
-                    {product.name}
-                  </h3>
-                </Link>
-                <div className="flex items-center mb-3">
-                  {[...Array(5)].map((_, i) => (
-                    <Star
-                      key={i}
-                      size={16}
-                      className={i < Math.floor(product.rating) ? "text-deepNavy fill-deepNavy" : "text-gray-300"}
-                    />
-                  ))}
-                  <span className="ml-2 text-sm text-gray-600">{product.rating}</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="font-poppins font-bold text-lg">${product.price}</span>
-                  <button 
-                    className="btn-primary"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      handleAddToCart(product.id);
-                    }}
-                  >
-                    Add to Cart
-                  </button>
-                </div>
               </div>
+            ))
+          ) : (
+            <div className="col-span-full text-center py-12">
+              <p className="text-lg text-gray-600">No products found matching your criteria.</p>
             </div>
-          ))}
+          )}
         </div>
+
+        {/* Empty state message */}
+        {displayedProducts.length === 0 && (
+          <div className="text-center py-12">
+            <p className="text-lg text-gray-600">No products found matching your criteria.</p>
+          </div>
+        )}
 
         {/* View All Button */}
         <div className="mt-12 text-center scroll-reveal">

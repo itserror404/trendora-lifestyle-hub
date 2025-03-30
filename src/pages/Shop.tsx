@@ -1,9 +1,10 @@
 
-import { useState } from "react";
-import { useParams } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import Layout from "@/components/layout/Layout";
 import { Link } from "react-router-dom";
 import { Star, Filter } from "lucide-react";
+import { toast } from "@/components/ui/use-toast";
 
 // Reusing the product data from FeaturedProducts
 const products = [
@@ -65,21 +66,66 @@ const products = [
 
 const Shop = () => {
   const { category } = useParams();
-  const [activeFilter, setActiveFilter] = useState(category || "All");
+  const navigate = useNavigate();
+  const [activeFilter, setActiveFilter] = useState<string>("All");
   const [hoveredProductId, setHoveredProductId] = useState<number | null>(null);
   const [sortBy, setSortBy] = useState("newest");
+  const [displayedProducts, setDisplayedProducts] = useState(products);
 
   const filters = ["All", "Fashion", "Electronics", "Home Decor"];
 
-  const filteredProducts = activeFilter === "All" 
-    ? products 
-    : products.filter(product => product.category === activeFilter);
+  // Update active filter when URL parameter changes
+  useEffect(() => {
+    if (category && filters.includes(category)) {
+      setActiveFilter(category);
+    } else {
+      setActiveFilter("All");
+    }
+  }, [category]);
+
+  // Apply filters and sorting whenever these values change
+  useEffect(() => {
+    let filtered = [...products];
+    
+    // Apply category filter
+    if (activeFilter !== "All") {
+      filtered = filtered.filter(product => product.category === activeFilter);
+    }
+    
+    // Apply sorting
+    switch (sortBy) {
+      case "priceLow":
+        filtered.sort((a, b) => a.price - b.price);
+        break;
+      case "priceHigh":
+        filtered.sort((a, b) => b.price - a.price);
+        break;
+      case "bestSelling":
+        // For demo purposes, we'll just sort by rating
+        filtered.sort((a, b) => b.rating - a.rating);
+        break;
+      default:
+        // "newest" - no change to order as we assume they're already sorted by newest
+        break;
+    }
+    
+    setDisplayedProducts(filtered);
+  }, [activeFilter, sortBy]);
+
+  // Handle filter change
+  const handleFilterChange = (filter: string) => {
+    setActiveFilter(filter);
+    navigate(filter === "All" ? "/shop" : `/shop/${filter}`);
+  };
 
   // Handle adding to cart
   const handleAddToCart = (productId: number) => {
     // In a real app, this would add the product to the cart
     console.log(`Added product ${productId} to cart`);
-    alert(`Product added to cart!`);
+    toast({
+      title: "Product added to cart",
+      description: "The item has been added to your shopping cart.",
+    });
   };
 
   return (
@@ -99,7 +145,7 @@ const Shop = () => {
               {filters.map((filter) => (
                 <button
                   key={filter}
-                  onClick={() => setActiveFilter(filter)}
+                  onClick={() => handleFilterChange(filter)}
                   className={`filter-pill ${activeFilter === filter ? 'bg-pastelBlue font-medium' : ''}`}
                 >
                   {filter}
@@ -123,59 +169,72 @@ const Shop = () => {
 
           {/* Product Grid */}
           <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-8">
-            {filteredProducts.map((product) => (
-              <div 
-                key={product.id} 
-                className="product-card scroll-reveal"
-                onMouseEnter={() => setHoveredProductId(product.id)}
-                onMouseLeave={() => setHoveredProductId(null)}
-              >
-                <Link to={`/shop/product/${product.id}`}>
-                  <div className="relative overflow-hidden aspect-square">
-                    <img
-                      src={hoveredProductId === product.id ? product.hoverImage : product.image}
-                      alt={product.name}
-                      className="w-full h-full object-cover product-image-hover"
-                    />
-                    <div className="absolute top-4 left-4">
-                      <span className="bg-deepNavy text-white text-xs px-3 py-1 rounded-full">
-                        {product.category}
-                      </span>
+            {displayedProducts.length > 0 ? (
+              displayedProducts.map((product) => (
+                <div 
+                  key={product.id} 
+                  className="product-card scroll-reveal"
+                  onMouseEnter={() => setHoveredProductId(product.id)}
+                  onMouseLeave={() => setHoveredProductId(null)}
+                >
+                  <Link to={`/shop/product/${product.id}`}>
+                    <div className="relative overflow-hidden aspect-square">
+                      <img
+                        src={hoveredProductId === product.id ? product.hoverImage : product.image}
+                        alt={product.name}
+                        className="w-full h-full object-cover product-image-hover"
+                      />
+                      <div className="absolute top-4 left-4">
+                        <span className="bg-deepNavy text-white text-xs px-3 py-1 rounded-full">
+                          {product.category}
+                        </span>
+                      </div>
+                    </div>
+                  </Link>
+                  <div className="p-6">
+                    <Link to={`/shop/product/${product.id}`}>
+                      <h3 className="font-poppins font-semibold text-lg mb-2 hover:text-vibrantCoral transition-colors">
+                        {product.name}
+                      </h3>
+                    </Link>
+                    <div className="flex items-center mb-3">
+                      {[...Array(5)].map((_, i) => (
+                        <Star
+                          key={i}
+                          size={16}
+                          className={i < Math.floor(product.rating) ? "text-deepNavy fill-deepNavy" : "text-gray-300"}
+                        />
+                      ))}
+                      <span className="ml-2 text-sm text-gray-600">{product.rating}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="font-poppins font-bold text-lg">${product.price}</span>
+                      <button 
+                        className="btn-primary px-4 py-1.5 text-sm"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          handleAddToCart(product.id);
+                        }}
+                      >
+                        Add to Cart
+                      </button>
                     </div>
                   </div>
-                </Link>
-                <div className="p-6">
-                  <Link to={`/shop/product/${product.id}`}>
-                    <h3 className="font-poppins font-semibold text-lg mb-2 hover:text-vibrantCoral transition-colors">
-                      {product.name}
-                    </h3>
-                  </Link>
-                  <div className="flex items-center mb-3">
-                    {[...Array(5)].map((_, i) => (
-                      <Star
-                        key={i}
-                        size={16}
-                        className={i < Math.floor(product.rating) ? "text-deepNavy fill-deepNavy" : "text-gray-300"}
-                      />
-                    ))}
-                    <span className="ml-2 text-sm text-gray-600">{product.rating}</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="font-poppins font-bold text-lg">${product.price}</span>
-                    <button 
-                      className="btn-primary"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        handleAddToCart(product.id);
-                      }}
-                    >
-                      Add to Cart
-                    </button>
-                  </div>
                 </div>
+              ))
+            ) : (
+              <div className="col-span-full text-center py-12">
+                <p className="text-lg text-gray-600">No products found matching your criteria.</p>
               </div>
-            ))}
+            )}
           </div>
+          
+          {/* No products message */}
+          {displayedProducts.length === 0 && (
+            <div className="text-center py-12">
+              <p className="text-lg text-gray-600">No products found matching your criteria.</p>
+            </div>
+          )}
         </div>
       </div>
     </Layout>

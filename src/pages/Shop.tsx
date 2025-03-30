@@ -114,8 +114,7 @@ const Shop = () => {
   // Handle filter change
   const handleFilterChange = (filter: string) => {
     setActiveFilter(filter);
-    // Update URL, but prevent rerendering issues by using the navigate function
-    navigate(filter === "All" ? "/shop" : `/shop/${filter}`, { replace: true });
+    navigate(filter === "All" ? "/shop" : `/shop/${filter}`);
   };
 
   // Handle adding to cart

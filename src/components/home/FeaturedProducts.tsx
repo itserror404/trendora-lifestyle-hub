@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { ChevronLeft, ChevronRight, Star, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -70,6 +71,13 @@ const FeaturedProducts = () => {
     ? products 
     : products.filter(product => product.category === activeFilter);
 
+  // Handle adding to cart
+  const handleAddToCart = (productId: number) => {
+    // In a real app, this would add the product to the cart
+    console.log(`Added product ${productId} to cart`);
+    alert(`Product added to cart!`);
+  };
+
   return (
     <section className="py-20 px-6 md:px-12 bg-softWhite">
       <div className="container mx-auto">
@@ -135,7 +143,15 @@ const FeaturedProducts = () => {
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="font-poppins font-bold text-lg">${product.price}</span>
-                  <button className="btn-primary">Add to Cart</button>
+                  <button 
+                    className="btn-primary"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      handleAddToCart(product.id);
+                    }}
+                  >
+                    Add to Cart
+                  </button>
                 </div>
               </div>
             </div>

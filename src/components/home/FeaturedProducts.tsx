@@ -1,9 +1,8 @@
 import { useState, useEffect } from "react";
-import { ChevronLeft, ChevronRight, Star, ArrowRight } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
+import { ChevronRight, Star, ArrowRight } from "lucide-react";
+import { Link } from "react-router-dom";
 import { toast } from "@/components/ui/use-toast";
 
-// Mock product data
 const products = [
   {
     id: 1,
@@ -62,32 +61,32 @@ const products = [
 ];
 
 const FeaturedProducts = () => {
-  const [activeFilter, setActiveFilter] = useState("All");
+  const [activeFilter, setActiveFilter] = useState<string>("All");
   const [hoveredProductId, setHoveredProductId] = useState<number | null>(null);
   const [displayedProducts, setDisplayedProducts] = useState(products);
   const [sortBy, setSortBy] = useState<string>("newest");
-  const navigate = useNavigate();
 
   const filters = ["All", "Fashion", "Electronics", "Home Decor"];
 
+  // Filtering and sorting logic
   useEffect(() => {
-    let filteredProducts = [...products];
-
-    if (activeFilter !== "All") {
-      filteredProducts = filteredProducts.filter((product) => product.category === activeFilter);
-    }
+    let filteredProducts = activeFilter === "All"
+      ? [...products]
+      : products.filter((product) => product.category === activeFilter);
 
     switch (sortBy) {
       case "priceLow":
-        filteredProducts = [...filteredProducts].sort((a, b) => a.price - b.price);
+        filteredProducts.sort((a, b) => a.price - b.price);
         break;
       case "priceHigh":
-        filteredProducts = [...filteredProducts].sort((a, b) => b.price - a.price);
+        filteredProducts.sort((a, b) => b.price - a.price);
         break;
       case "bestSelling":
-        filteredProducts = [...filteredProducts].sort((a, b) => b.rating - a.rating);
+        filteredProducts.sort((a, b) => b.rating - a.rating);
         break;
       case "newest":
+      default:
+        filteredProducts = [...filteredProducts]; // Keep the default order
         break;
     }
 
@@ -109,15 +108,16 @@ const FeaturedProducts = () => {
   return (
     <section className="py-20 px-6 md:px-12 bg-softWhite">
       <div className="container mx-auto">
-        <div className="text-center mb-12 scroll-reveal">
+        <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-bold text-deepNavy mb-4">Featured Products</h2>
           <p className="text-gray-600 max-w-2xl mx-auto">
             Discover our handpicked selection of premium products that combine style, functionality, and quality craftsmanship.
           </p>
         </div>
 
+        {/* Filters and Sort Options */}
         <div className="flex flex-col md:flex-row md:justify-between items-center mb-8">
-          <div className="flex flex-wrap justify-center gap-4 mb-4 md:mb-0 scroll-reveal">
+          <div className="flex flex-wrap justify-center gap-4 mb-4 md:mb-0">
             {filters.map((filter) => (
               <button
                 key={filter}
@@ -129,73 +129,56 @@ const FeaturedProducts = () => {
             ))}
           </div>
 
-          <div className="flex items-center scroll-reveal">
+          <div className="flex items-center">
             <label className="mr-2 text-gray-700">Sort By: </label>
-            <div className="relative">
-              <select 
-                onChange={(e) => setSortBy(e.target.value)} 
-                value={sortBy}
-                className="appearance-none bg-white border border-gray-300 rounded-md py-2 px-4 pr-8 focus:outline-none focus:ring-2 focus:ring-pastelBlue"
-              >
-                <option value="newest">Newest</option>
-                <option value="priceLow">Price: Low to High</option>
-                <option value="priceHigh">Price: High to Low</option>
-                <option value="bestSelling">Best Selling</option>
-              </select>
-              <ChevronRight className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 pointer-events-none rotate-90" size={16} />
-            </div>
+            <select
+              onChange={(e) => setSortBy(e.target.value)}
+              value={sortBy}
+              className="bg-white border border-gray-300 rounded-md py-2 px-4"
+            >
+              <option value="newest">Newest</option>
+              <option value="priceLow">Price: Low to High</option>
+              <option value="priceHigh">Price: High to Low</option>
+              <option value="bestSelling">Best Selling</option>
+            </select>
           </div>
         </div>
 
+        {/* Products Display */}
         {displayedProducts.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {displayedProducts.map((product) => (
-              <div 
-                key={product.id} 
-                className="product-card scroll-reveal"
+              <div
+                key={product.id}
+                className="product-card"
                 onMouseEnter={() => setHoveredProductId(product.id)}
                 onMouseLeave={() => setHoveredProductId(null)}
               >
                 <Link to={`/shop/product/${product.id}`}>
-                  <div className="relative overflow-hidden aspect-square">
+                  <div className="relative">
                     <img
                       src={hoveredProductId === product.id ? product.hoverImage : product.image}
                       alt={product.name}
-                      className="w-full h-full object-cover product-image-hover"
+                      className="w-full h-60 object-cover"
                     />
-                    <div className="absolute top-4 left-4">
-                      <span className="bg-deepNavy text-white text-xs px-3 py-1 rounded-full">
-                        {product.category}
-                      </span>
-                    </div>
+                    <span className="absolute top-4 left-4 bg-deepNavy text-white text-xs px-3 py-1 rounded-full">
+                      {product.category}
+                    </span>
                   </div>
                 </Link>
                 <div className="p-6">
                   <Link to={`/shop/product/${product.id}`}>
-                    <h3 className="font-poppins font-semibold text-lg mb-2 hover:text-vibrantCoral transition-colors">
-                      {product.name}
-                    </h3>
+                    <h3 className="text-lg font-semibold mb-2">{product.name}</h3>
                   </Link>
                   <div className="flex items-center mb-3">
                     {[...Array(5)].map((_, i) => (
-                      <Star
-                        key={i}
-                        size={16}
-                        className={i < Math.floor(product.rating) ? "text-deepNavy fill-deepNavy" : "text-gray-300"}
-                      />
+                      <Star key={i} size={16} className={i < Math.floor(product.rating) ? "text-deepNavy" : "text-gray-300"} />
                     ))}
-                    <span className="ml-2 text-sm text-gray-600">{product.rating}</span>
+                    <span className="ml-2">{product.rating}</span>
                   </div>
-                  <div className="flex justify-between items-center">
-                    <span className="font-poppins font-bold text-lg">${product.price}</span>
-                    <button 
-                      className="btn-primary px-3 py-1 text-sm"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        handleAddToCart(product.id);
-                      }}
-                    >
+                  <div className="flex justify-between">
+                    <span className="font-bold text-lg">${product.price}</span>
+                    <button onClick={() => handleAddToCart(product.id)} className="btn-primary">
                       Add to Cart
                     </button>
                   </div>
@@ -204,17 +187,8 @@ const FeaturedProducts = () => {
             ))}
           </div>
         ) : (
-          <div className="text-center py-12">
-            <p className="text-lg text-gray-600">No products found matching your criteria.</p>
-          </div>
+          <p className="text-center py-12 text-gray-600">No products found.</p>
         )}
-
-        <div className="mt-12 text-center scroll-reveal">
-          <Link to="/shop" className="btn-secondary inline-flex items-center gap-2">
-            View All Products
-            <ArrowRight size={16} />
-          </Link>
-        </div>
       </div>
     </section>
   );

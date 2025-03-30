@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Layout from "@/components/layout/Layout";
@@ -35,33 +34,6 @@ const products = [
     image: "https://images.unsplash.com/photo-1612196808214-b7e139549e09?auto=format&fit=crop&q=80&w=1000",
     hoverImage: "https://images.unsplash.com/photo-1603204077167-2fa0397f591b?auto=format&fit=crop&q=80&w=1000",
   },
-  {
-    id: 4,
-    name: "Premium Leather Wallet",
-    category: "Fashion",
-    price: 89.99,
-    rating: 4.6,
-    image: "https://images.unsplash.com/photo-1627123424574-724758594e93?auto=format&fit=crop&q=80&w=1000",
-    hoverImage: "https://images.unsplash.com/photo-1627123367874-e34225e62b41?auto=format&fit=crop&q=80&w=1000",
-  },
-  {
-    id: 5,
-    name: "Smart Home Speaker",
-    category: "Electronics",
-    price: 199.99,
-    rating: 4.8,
-    image: "https://images.unsplash.com/photo-1589003077984-894e133dabab?auto=format&fit=crop&q=80&w=1000",
-    hoverImage: "https://images.unsplash.com/photo-1508345228704-935cc84bf5e2?auto=format&fit=crop&q=80&w=1000",
-  },
-  {
-    id: 6,
-    name: "Minimalist Table Lamp",
-    category: "Home Decor",
-    price: 149.99,
-    rating: 4.5,
-    image: "https://images.unsplash.com/photo-1513506003901-1e6a229e2d15?auto=format&fit=crop&q=80&w=1000",
-    hoverImage: "https://images.unsplash.com/photo-1540932239986-30128078f3c5?auto=format&fit=crop&q=80&w=1000",
-  },
 ];
 
 const Shop = () => {
@@ -69,7 +41,6 @@ const Shop = () => {
   const navigate = useNavigate();
   
   const [activeFilter, setActiveFilter] = useState<string>("All");
-  const [hoveredProductId, setHoveredProductId] = useState<number | null>(null);
   const [sortBy, setSortBy] = useState<string>("newest");
   const [displayedProducts, setDisplayedProducts] = useState(products);
 
@@ -86,11 +57,13 @@ const Shop = () => {
 
   // Apply filters and sorting
   useEffect(() => {
+    console.log(`Filtering: ${activeFilter}, Sorting: ${sortBy}`);
+
     let filtered = [...products];
 
     // Apply category filter
     if (activeFilter !== "All") {
-      filtered = filtered.filter(product => product.category === activeFilter);
+      filtered = filtered.filter((product) => product.category === activeFilter);
     }
 
     // Apply sorting
@@ -105,7 +78,7 @@ const Shop = () => {
         filtered.sort((a, b) => b.rating - a.rating);
         break;
       default:
-        break; // "newest" is the default
+        break;
     }
 
     setDisplayedProducts(filtered);
@@ -179,7 +152,10 @@ const Shop = () => {
             ))}
           </div>
 
-          {displayedProducts.length === 0 && <p className="text-center py-12">No products found.</p>}
+          {/* Empty State */}
+          {displayedProducts.length === 0 && (
+            <p className="text-center py-12">No products found matching your criteria.</p>
+          )}
         </div>
       </div>
     </Layout>

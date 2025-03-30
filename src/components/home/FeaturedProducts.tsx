@@ -156,9 +156,10 @@ const FeaturedProducts = () => {
                   <div className="flex justify-between items-center">
                     <span className="font-poppins font-bold text-lg">${product.price}</span>
                     <button 
-                      className="btn-primary px-4 py-1.5 text-sm"
+                      className="btn-primary px-3 py-1 text-sm"
                       onClick={(e) => {
                         e.preventDefault();
+                        e.stopPropagation();
                         handleAddToCart(product.id);
                       }}
                     >
@@ -174,13 +175,6 @@ const FeaturedProducts = () => {
             </div>
           )}
         </div>
-
-        {/* Empty state message */}
-        {displayedProducts.length === 0 && (
-          <div className="text-center py-12">
-            <p className="text-lg text-gray-600">No products found matching your criteria.</p>
-          </div>
-        )}
 
         {/* View All Button */}
         <div className="mt-12 text-center scroll-reveal">

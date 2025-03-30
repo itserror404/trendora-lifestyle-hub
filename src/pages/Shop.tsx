@@ -83,7 +83,7 @@ const Shop = () => {
     }
   }, [category]);
 
-  // Apply filters and sorting whenever these values change
+  // Apply filters and sorting
   useEffect(() => {
     let filtered = [...products];
     
@@ -119,7 +119,9 @@ const Shop = () => {
   };
 
   // Handle adding to cart
-  const handleAddToCart = (productId: number) => {
+  const handleAddToCart = (productId: number, e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
     // In a real app, this would add the product to the cart
     console.log(`Added product ${productId} to cart`);
     toast({
@@ -210,11 +212,8 @@ const Shop = () => {
                     <div className="flex justify-between items-center">
                       <span className="font-poppins font-bold text-lg">${product.price}</span>
                       <button 
-                        className="btn-primary px-4 py-1.5 text-sm"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          handleAddToCart(product.id);
-                        }}
+                        className="btn-primary px-3 py-1 text-sm"
+                        onClick={(e) => handleAddToCart(product.id, e)}
                       >
                         Add to Cart
                       </button>
@@ -228,13 +227,6 @@ const Shop = () => {
               </div>
             )}
           </div>
-          
-          {/* No products message */}
-          {displayedProducts.length === 0 && (
-            <div className="text-center py-12">
-              <p className="text-lg text-gray-600">No products found matching your criteria.</p>
-            </div>
-          )}
         </div>
       </div>
     </Layout>

@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { ChevronLeft, ChevronRight, Star, ArrowRight } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { toast } from "@/components/ui/use-toast";
 
 // Mock product data
@@ -66,18 +66,37 @@ const FeaturedProducts = () => {
   const [activeFilter, setActiveFilter] = useState("All");
   const [hoveredProductId, setHoveredProductId] = useState<number | null>(null);
   const [displayedProducts, setDisplayedProducts] = useState(products);
+  const [sortBy, setSortBy] = useState<string>("newest");
+  const navigate = useNavigate();
 
   const filters = ["All", "Fashion", "Electronics", "Home Decor"];
 
-  // Update filtered products when activeFilter changes
+  // Apply filters and sorting
   useEffect(() => {
-    if (activeFilter === "All") {
-      setDisplayedProducts(products);
-    } else {
-      const filtered = products.filter(product => product.category === activeFilter);
-      setDisplayedProducts(filtered);
+    let filteredProducts = [...products];
+
+    if (activeFilter !== "All") {
+      filteredProducts = filteredProducts.filter((product) => product.category === activeFilter);
     }
-  }, [activeFilter]);
+
+    switch (sortBy) {
+      case "priceLow":
+        filteredProducts = [...filteredProducts].sort((a, b) => a.price - b.price);
+        break;
+      case "priceHigh":
+        filteredProducts = [...filteredProducts].sort((a, b) => b.price - a.price);
+        break;
+      case "bestSelling":
+        filteredProducts = [...filteredProducts].sort((a, b) => b.rating - a.rating);
+        break;
+    }
+
+    setDisplayedProducts(filteredProducts);
+  }, [activeFilter, sortBy]);
+
+  const handleFilterChange = (filter: string) => {
+    setActiveFilter(filter);
+  };
 
   // Handle adding to cart
   const handleAddToCart = (productId: number) => {
@@ -100,78 +119,98 @@ const FeaturedProducts = () => {
           </p>
         </div>
 
-        {/* Filter Pills */}
-        <div className="flex flex-wrap justify-center gap-4 mb-12 scroll-reveal">
-          {filters.map((filter) => (
-            <button
-              key={filter}
-              onClick={() => setActiveFilter(filter)}
-              className={`filter-pill ${activeFilter === filter ? 'bg-pastelBlue font-medium' : ''}`}
-            >
-              {filter}
-            </button>
-          ))}
+        {/* Filter and Sort */}
+        <div className="flex flex-col md:flex-row md:justify-between items-center mb-8">
+          {/* Filter Pills */}
+          <div className="flex flex-wrap justify-center gap-4 mb-4 md:mb-0 scroll-reveal">
+            {filters.map((filter) => (
+              <button
+                key={filter}
+                onClick={() => handleFilterChange(filter)}
+                className={`filter-pill ${activeFilter === filter ? 'bg-pastelBlue font-medium' : ''}`}
+              >
+                {filter}
+              </button>
+            ))}
+          </div>
+
+          {/* Sorting Dropdown */}
+          <div className="flex items-center scroll-reveal">
+            <label className="mr-2 text-gray-700">Sort By: </label>
+            <div className="relative">
+              <select 
+                onChange={(e) => setSortBy(e.target.value)} 
+                value={sortBy}
+                className="appearance-none bg-white border border-gray-300 rounded-md py-2 px-4 pr-8 focus:outline-none focus:ring-2 focus:ring-pastelBlue"
+              >
+                <option value="newest">Newest</option>
+                <option value="priceLow">Price: Low to High</option>
+                <option value="priceHigh">Price: High to Low</option>
+                <option value="bestSelling">Best Selling</option>
+              </select>
+              <ChevronRight className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 pointer-events-none rotate-90" size={16} />
+            </div>
+          </div>
         </div>
 
         {/* Product Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {displayedProducts.map((product) => (
-            <div 
-              key={product.id} 
-              className="product-card scroll-reveal"
-              onMouseEnter={() => setHoveredProductId(product.id)}
-              onMouseLeave={() => setHoveredProductId(null)}
-            >
-              <Link to={`/shop/product/${product.id}`}>
-                <div className="relative overflow-hidden aspect-square">
-                  <img
-                    src={hoveredProductId === product.id ? product.hoverImage : product.image}
-                    alt={product.name}
-                    className="w-full h-full object-cover product-image-hover"
-                  />
-                  <div className="absolute top-4 left-4">
-                    <span className="bg-deepNavy text-white text-xs px-3 py-1 rounded-full">
-                      {product.category}
-                    </span>
+        {displayedProducts.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {displayedProducts.map((product) => (
+              <div 
+                key={product.id} 
+                className="product-card scroll-reveal"
+                onMouseEnter={() => setHoveredProductId(product.id)}
+                onMouseLeave={() => setHoveredProductId(null)}
+              >
+                <Link to={`/shop/product/${product.id}`}>
+                  <div className="relative overflow-hidden aspect-square">
+                    <img
+                      src={hoveredProductId === product.id ? product.hoverImage : product.image}
+                      alt={product.name}
+                      className="w-full h-full object-cover product-image-hover"
+                    />
+                    <div className="absolute top-4 left-4">
+                      <span className="bg-deepNavy text-white text-xs px-3 py-1 rounded-full">
+                        {product.category}
+                      </span>
+                    </div>
+                  </div>
+                </Link>
+                <div className="p-6">
+                  <Link to={`/shop/product/${product.id}`}>
+                    <h3 className="font-poppins font-semibold text-lg mb-2 hover:text-vibrantCoral transition-colors">
+                      {product.name}
+                    </h3>
+                  </Link>
+                  <div className="flex items-center mb-3">
+                    {[...Array(5)].map((_, i) => (
+                      <Star
+                        key={i}
+                        size={16}
+                        className={i < Math.floor(product.rating) ? "text-deepNavy fill-deepNavy" : "text-gray-300"}
+                      />
+                    ))}
+                    <span className="ml-2 text-sm text-gray-600">{product.rating}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="font-poppins font-bold text-lg">${product.price}</span>
+                    <button 
+                      className="btn-primary px-3 py-1 text-sm"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        handleAddToCart(product.id);
+                      }}
+                    >
+                      Add to Cart
+                    </button>
                   </div>
                 </div>
-              </Link>
-              <div className="p-6">
-                <Link to={`/shop/product/${product.id}`}>
-                  <h3 className="font-poppins font-semibold text-lg mb-2 hover:text-vibrantCoral transition-colors">
-                    {product.name}
-                  </h3>
-                </Link>
-                <div className="flex items-center mb-3">
-                  {[...Array(5)].map((_, i) => (
-                    <Star
-                      key={i}
-                      size={16}
-                      className={i < Math.floor(product.rating) ? "text-deepNavy fill-deepNavy" : "text-gray-300"}
-                    />
-                  ))}
-                  <span className="ml-2 text-sm text-gray-600">{product.rating}</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="font-poppins font-bold text-lg">${product.price}</span>
-                  <button 
-                    className="btn-primary px-3 py-1 text-sm"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      handleAddToCart(product.id);
-                    }}
-                  >
-                    Add to Cart
-                  </button>
-                </div>
               </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Empty state message - only show when needed */}
-        {displayedProducts.length === 0 && (
+            ))}
+          </div>
+        ) : (
           <div className="text-center py-12">
             <p className="text-lg text-gray-600">No products found matching your criteria.</p>
           </div>

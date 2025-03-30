@@ -122,10 +122,18 @@ const Shop = () => {
 
   return (
     <Layout>
+      {/* Page Header Banner */}
+      <div className="bg-softWhite py-16">
+        <div className="container mx-auto text-center">
+          <h1 className="text-3xl md:text-4xl font-bold mb-4 text-deepNavy">Shop Our Products</h1>
+          <p className="text-gray-600 max-w-2xl mx-auto">
+            Explore our curated collection of premium products designed for modern living
+          </p>
+        </div>
+      </div>
+      
       <div className="py-12 px-6">
         <div className="container mx-auto">
-          <h1 className="text-3xl md:text-4xl font-bold mb-8 text-deepNavy">Shop Our Products</h1>
-          
           {/* Filters */}
           <div className="flex flex-wrap gap-3 mb-8">
             {filters.map((filter) => (

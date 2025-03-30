@@ -123,16 +123,17 @@ const Shop = () => {
   return (
     <Layout>
       {/* Page Header Banner */}
-      <div className="bg-softWhite py-16">
-        <div className="container mx-auto text-center">
-          <h1 className="text-3xl md:text-4xl font-bold mb-4 text-deepNavy">Shop Our Products</h1>
-          <p className="text-gray-600 max-w-2xl mx-auto">
+      <div className="bg-softWhite py-10">
+        <div className="container mx-auto">
+          {/* The heading is moved lower, below the header banner */}
+          <h1 className="text-3xl md:text-4xl font-bold mb-4 text-deepNavy text-center mt-6">Shop Our Products</h1>
+          <p className="text-gray-600 max-w-2xl mx-auto text-center mb-4">
             Explore our curated collection of premium products designed for modern living
           </p>
         </div>
       </div>
       
-      <div className="py-12 px-6">
+      <div className="py-8 px-6">
         <div className="container mx-auto">
           {/* Filters */}
           <div className="flex flex-wrap gap-3 mb-8">

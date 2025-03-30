@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { ChevronLeft, ChevronRight, Star, ArrowRight } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
@@ -71,7 +70,6 @@ const FeaturedProducts = () => {
 
   const filters = ["All", "Fashion", "Electronics", "Home Decor"];
 
-  // Apply filters and sorting
   useEffect(() => {
     let filteredProducts = [...products];
 
@@ -89,6 +87,8 @@ const FeaturedProducts = () => {
       case "bestSelling":
         filteredProducts = [...filteredProducts].sort((a, b) => b.rating - a.rating);
         break;
+      case "newest":
+        break;
     }
 
     setDisplayedProducts(filteredProducts);
@@ -98,9 +98,7 @@ const FeaturedProducts = () => {
     setActiveFilter(filter);
   };
 
-  // Handle adding to cart
   const handleAddToCart = (productId: number) => {
-    // In a real app, this would add the product to the cart
     console.log(`Added product ${productId} to cart`);
     toast({
       title: "Product added to cart",
@@ -111,7 +109,6 @@ const FeaturedProducts = () => {
   return (
     <section className="py-20 px-6 md:px-12 bg-softWhite">
       <div className="container mx-auto">
-        {/* Section Heading */}
         <div className="text-center mb-12 scroll-reveal">
           <h2 className="text-3xl md:text-4xl font-bold text-deepNavy mb-4">Featured Products</h2>
           <p className="text-gray-600 max-w-2xl mx-auto">
@@ -119,9 +116,7 @@ const FeaturedProducts = () => {
           </p>
         </div>
 
-        {/* Filter and Sort */}
         <div className="flex flex-col md:flex-row md:justify-between items-center mb-8">
-          {/* Filter Pills */}
           <div className="flex flex-wrap justify-center gap-4 mb-4 md:mb-0 scroll-reveal">
             {filters.map((filter) => (
               <button
@@ -134,7 +129,6 @@ const FeaturedProducts = () => {
             ))}
           </div>
 
-          {/* Sorting Dropdown */}
           <div className="flex items-center scroll-reveal">
             <label className="mr-2 text-gray-700">Sort By: </label>
             <div className="relative">
@@ -153,7 +147,6 @@ const FeaturedProducts = () => {
           </div>
         </div>
 
-        {/* Product Grid */}
         {displayedProducts.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {displayedProducts.map((product) => (
@@ -216,7 +209,6 @@ const FeaturedProducts = () => {
           </div>
         )}
 
-        {/* View All Button */}
         <div className="mt-12 text-center scroll-reveal">
           <Link to="/shop" className="btn-secondary inline-flex items-center gap-2">
             View All Products
